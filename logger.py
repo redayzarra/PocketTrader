@@ -1,26 +1,21 @@
 import logging
 import os
 
+# Create a logs directory if it doesn't already exist
 path = "./logs"
-try:
-    os.mkdir(path)
-except OSError:
-    print("Creating directory %s not successful unless already exists" % path)
-else:
-    print("Directory created!")
+os.makedirs(path, exist_ok=True)
+print(f"Directory '{path}' created or already exists.")
 
-    # Creating log file to store errors
-logging.basicConfig(filename="trading_bot.log",
+# Configure logging
+log_file = os.path.join(path, "trading_bot.log")
+logging.basicConfig(filename=log_file,
                     format="%(asctime)s - %(levelname)s: %(message)s",
                     encoding="utf-8",
                     level=logging.DEBUG)
 
-logging.debug("Debugger")
-
-logging.info("Useful messages")
-
-logging.warning("Warn me")
-
-logging.error("Any error messages")
-
-logging.critical("what's wrong")
+# Sample log messages
+logging.debug("Debugging message")
+logging.info("Informational message")
+logging.warning("Warning message")
+logging.error("Error message")
+logging.critical("Critical message")
