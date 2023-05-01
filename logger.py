@@ -6,8 +6,10 @@ logging.basicConfig(filename="trading_bot.log",
                     encoding="utf-8",
                     level=logging.DEBUG)
 
-logging.debug("Testing")
+logging.debug("Debugger")
 
-logging.debug("Again, testing 2")
+logging.info("Useful messages")
 
-logging.info("Testing 3")
+logging.warning("Warn me")
+
+logging.error("Any error messages")
