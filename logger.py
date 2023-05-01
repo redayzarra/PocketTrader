@@ -9,3 +9,5 @@ logging.basicConfig(filename="trading_bot.log",
 logging.debug("Testing")
 
 logging.debug("Again, testing 2")
+
+logging.info("Testing 3")
