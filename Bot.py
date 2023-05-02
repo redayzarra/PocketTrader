@@ -3,4 +3,5 @@ from library import *
 from logger import *
 
 
-initialize_logging(log_level=logging.INFO, log_folder="custom_logs")
+initialize_logging(log_level=logging.INFO, log_folder="logs")
+
