@@ -57,6 +57,10 @@ def main():
     clear_orders(open_orders)
 
     ticker = get_ticker()
+
+    mytrader = TraderBot(ticker)
+    mytrader.run()
+
     print(f"Operating with ticker: {ticker}")
 
 
