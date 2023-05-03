@@ -118,6 +118,18 @@ class TraderBot:
             )
             sys.exit()
 
+    def open_positions(self, asset_id: int) -> bool:
+        """
+        Checks if there are any open positions for the specified asset ID.
+
+        Args:
+            asset_id (int): The asset ID to check for open positions.
+
+        Returns:
+            bool: True if there is an open position for the asset ID, False otherwise.
+        """
+        return any(position.symbol == asset_id for position in positions)
+
     def run(self):
         """
         Starts running the trading bot.
