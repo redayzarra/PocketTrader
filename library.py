@@ -50,8 +50,8 @@ class TraderBot:
                 return True
         except:
             logging.error(
-                f"Can't tell if {ticker} is tradable."
-            )  # Something is breaking:(
+                f"Can't tell if {ticker} is tradable."  # Something is breaking :(
+            )
             return False
 
     def stop_loss(self, entry: float, direction: str) -> float:
@@ -68,15 +68,47 @@ class TraderBot:
         Raises:
             ValueError: If an invalid direction is provided.
         """
-        percent_margin = 0.05
+        stoplossMargin = 0.05
 
         try:
             if direction == "long":
-                stop_loss = entry - (entry * percent_margin)
+                stop_loss = entry - (entry * stoplossMargin)
                 return stop_loss
             elif direction == "short":
-                stop_loss = entry + (entry * percent_margin)
+                stop_loss = entry + (entry * stoplossMargin)
                 return stop_loss
+            else:
+                raise ValueError(f"Invalid direction is '{direction}'")
+
+        except ValueError as e:
+            logging.error(
+                f"There is an invalid direction other than 'long' and 'short': {e}"
+            )
+            sys.exit()  # Figure it out when the program stops. No need to waste money.
+
+    def take_profit(self, entry: float, direction: str) -> float:
+        """
+        Calculates the take-profit price based on the entry price and the specified direction.
+
+        Args:
+            entry (float): The entry price of the asset.
+            direction (str): The direction of the trade, either "long" or "short".
+
+        Returns:
+            float: The calculated take-profit price.
+
+        Raises:
+            ValueError: If an invalid direction is provided.
+        """
+        profitMargin = 0.1  # Percent margin
+
+        try:
+            if direction == "long":
+                takeProfit = entry + (entry * profitMargin)
+                return takeProfit
+            elif direction == "short":
+                takeProfit = entry - (entry * profitMargin)
+                return takeProfit
             else:
                 raise ValueError(f"Invalid direction: {direction}")
 
@@ -84,7 +116,7 @@ class TraderBot:
             logging.error(
                 f"There is an invalid direction other than 'long' and 'short': {e}"
             )
-            sys.exit()  # Figure it out when the program stops. No need to waste money.
+            sys.exit()
 
     def run(self):
         """
