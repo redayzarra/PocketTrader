@@ -21,10 +21,3 @@ def initialize_logging(log_level=logging.DEBUG, log_folder="logs"):
     )
 
     logging.getLogger().addHandler(logging.StreamHandler())
-
-    # Sample log messages
-    logging.debug("Debugging message")
-    logging.info("Informational message")
-    logging.warning("Warning message")
-    logging.error("Error message")
-    logging.critical("Critical message")
