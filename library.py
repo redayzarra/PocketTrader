@@ -1,4 +1,5 @@
 # Import all libraries - specify later.
+import sys
 from logger import *
 
 
@@ -52,6 +53,38 @@ class TraderBot:
                 f"Can't tell if {ticker} is tradable."
             )  # Something is breaking:(
             return False
+
+    def stop_loss(self, entry: float, direction: str) -> float:
+        """
+        Calculates the stop-loss price based on the entry price and the specified direction.
+
+        Args:
+            entry (float): The entry price of the asset.
+            direction (str): The direction of the trade, either "long" or "short".
+
+        Returns:
+            float: The calculated stop-loss price.
+
+        Raises:
+            ValueError: If an invalid direction is provided.
+        """
+        percent_margin = 0.05
+
+        try:
+            if direction == "long":
+                stop_loss = entry - (entry * percent_margin)
+                return stop_loss
+            elif direction == "short":
+                stop_loss = entry + (entry * percent_margin)
+                return stop_loss
+            else:
+                raise ValueError(f"Invalid direction: {direction}")
+
+        except ValueError as e:
+            logging.error(
+                f"There is an invalid direction other than 'long' and 'short': {e}"
+            )
+            sys.exit()  # Figure it out when the program stops. No need to waste money.
 
     def run(self):
         """
