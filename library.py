@@ -1,5 +1,6 @@
 # Import all libraries - specify later.
 import sys
+import time
 from logger import *
 
 
@@ -129,6 +130,32 @@ class TraderBot:
             bool: True if there is an open position for the asset ID, False otherwise.
         """
         return any(position.symbol == asset_id for position in positions)
+
+    def check_position(self, asset) -> bool:
+        """
+        Checks the position of the specified asset, retrying for a limited number of attempts.
+
+        Args:
+            asset: The asset to check the position for.
+
+        Returns:
+            bool: True if the position check is successful, False otherwise.
+        """
+        max_attempts = 5
+        attempt = 0
+
+        while attempt <= max_attempts:
+            try:
+                current_price = asset.current_price
+                logging.info(f"Position checked. Current price is {current_price}")
+                return True
+            except:
+                logging.info("Position was not checked. Trying again in 5 seconds.")
+                time.sleep(5)
+                attempt += 1
+
+        logging.error(f"Position was not found: {asset}")
+        return False
 
     def run(self):
         """
