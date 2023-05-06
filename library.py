@@ -10,6 +10,7 @@ import pandas as pd
 import pytz
 import tulipy as ti
 import yfinance as yf
+import alpaca
 
 from logger import *
 
@@ -153,6 +154,44 @@ class TraderBot:
 
         logging.error(f"Position was not found: {asset}")
         return False
+
+    def general_trend(self, asset):
+        """
+        Determines the general trend of the given asset based on EMA values.
+
+        Args:
+            asset: The asset for which to find the trend.
+
+        Returns:
+            str: The general trend of the asset, either "long", "short", or "no trend".
+        """
+        max_attempts = 10
+        attempt = 0
+
+        while attempt < max_attempts:
+            try:
+                ema9 = ti.ema(data, 9)
+                ema26 = ti.ema(data, 26)
+                ema50 = ti.ema(data, 50)
+
+                # Determine the trend based on EMA values
+                if ema9 > ema26 and ema9 > ema50:
+                    logging.info(f"Trend for {asset}: Long")
+                    return "long"
+                elif ema9 < ema26 and ema9 < ema50:
+                    logging.info(f"Trend for {asset}: Short")
+                    return "short"
+                else:
+                    logging.info(f"Can't find trend for {asset} just yet.")
+                    time.sleep(60)
+                    attempt += 1
+            except Exception as e:
+                logging.error("Error occurred while getting trend.")
+                logging.error(e)
+                sys.exit()
+
+        logging.info(f"Trend for {asset} can't be found, not waiting any longer")
+        return "no trend"
 
     def run(self):
         """
