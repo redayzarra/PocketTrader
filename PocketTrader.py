@@ -10,10 +10,11 @@ import numpy as np
 import pandas as pd
 import pytz
 import tulipy as ti
-import yfinance as yf # Not needed
+import yfinance as yf  # Not needed
 import alpaca
 
 from logger import *
+
 
 class TraderBot:
     """
@@ -174,6 +175,8 @@ class TraderBot:
                 ema26 = ti.ema(data, 26)
                 ema50 = ti.ema(data, 50)
 
+                logging.info(f"{asset} general trend EMAS: {ema9}, {ema26}, {ema50}")
+
                 # Determine the trend based on EMA values
                 if ema9 > ema26 and ema9 > ema50:
                     logging.info(f"Trend for {asset}: Long")
@@ -205,25 +208,30 @@ class TraderBot:
             bool: True if the specified trend is valid, False otherwise.
         """
         max_attempts = 10
-        attempt = 0
 
-        ema9 = ti.ema(data, 9)
-        ema26 = ti.ema(data, 26)
-        ema50 = ti.ema(data, 50)
+        for attempt in range(1, max_attempts + 1):
+            try:
+                ema9 = ti.ema(data, 9)
+                ema26 = ti.ema(data, 26)
+                ema50 = ti.ema(data, 50)
 
-        while attempt <= max_attempts:
-            if (trend == "long") and (ema9 > ema26) and (ema26 > ema50):
-                logging.info(f"We found a long trend for {asset}")
-                return True
-            elif (trend == "short") and (ema9 < ema26) and (ema26 < ema50):
-                logging.info(f"We found a short trend for {asset}")
-                return True
-            else:
-                logging.info(
-                    f"Can't find trend for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                logging.info(f"{asset} instant trend EMAs: {ema9}, {ema26}, {ema50}")
+
+                if (trend == "long") and (ema9 > ema26) and (ema26 > ema50):
+                    logging.info(f"We found a long trend for {asset}")
+                    return True
+                elif (trend == "short") and (ema9 < ema26) and (ema26 < ema50):
+                    logging.info(f"We found a short trend for {asset}")
+                    return True
+                else:
+                    logging.info(
+                        f"Can't find trend for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                    )
+                    time.sleep(60)
+            except Exception as e:
+                logging.warning(
+                    f"Failed to find the {trend} trend for {asset} on attempt {attempt} due to error: {e}"
                 )
-                attempt += 1
-                time.sleep(60)
 
         logging.warning(
             f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
