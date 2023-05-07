@@ -14,3 +14,6 @@ import yfinance as yf # Not needed
 import alpaca
 
 from logger import *
+
+class TraderBot:
+    pass
