@@ -239,6 +239,46 @@ class TraderBot:
         )
         return False
 
+    def calculate_rsi(self, data, period=14):
+        try:
+            rsi = ti.rsi(data, period)
+            return rsi
+        except Exception as e:
+            logging.error(f"Error calculating RSI: {e}")
+            return None
+
+    def rsi(self, asset, trend):
+        logging.info("STARTING RSI ANALYSIS")
+
+        max_attempts = 10
+
+        for attempt in range(1, max_attempts + 1):
+            rsi = self.calculate_rsi(data)
+
+            if rsi is None:
+                logging.warning(f"Error calculating RSI for {asset}, attempt {attempt}")
+                time.sleep(30)
+                continue
+
+            logging.info(f"{asset} rsi = {rsi}")
+
+            if (trend == "long") and (rsi > 50) and (rsi < 80):
+                logging.info(f"We found a long trend for {asset}")
+                return True
+            elif (trend == "short") and (rsi < 50) and (rsi > 20):
+                logging.info(f"We found a short trend for {asset}")
+                return True
+            else:
+                logging.info(
+                    f"Can't find rsi for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                )
+                time.sleep(30)
+
+        logging.warning(
+            f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
+        )
+        return False
+
     def run(self):
         """
         Starts running the trading bot.
