@@ -240,6 +240,16 @@ class TraderBot:
         return False
 
     def calculate_rsi(self, data, period=14):
+        """
+        Calculate the RSI for the given data and period.
+
+        Args:
+            data: The price data for the asset.
+            period (int, optional): The period to use for RSI calculation. Defaults to 14.
+
+        Returns:
+            float: The calculated RSI value, or None if an error occurred.
+        """
         try:
             rsi = ti.rsi(data, period)
             return rsi
@@ -248,6 +258,16 @@ class TraderBot:
             return None
 
     def rsi(self, asset, trend):
+        """
+        Analyze the RSI for the given asset and trend direction.
+
+        Args:
+            asset: The asset to analyze.
+            trend (str): The trend direction to check, either "long" or "short".
+
+        Returns:
+            bool: True if the RSI supports the specified trend, False otherwise.
+        """
         logging.info("STARTING RSI ANALYSIS")
 
         max_attempts = 10
@@ -278,6 +298,9 @@ class TraderBot:
             f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
         )
         return False
+
+    def stochastic(self, asset, trend):
+        pass
 
     def run(self):
         """
