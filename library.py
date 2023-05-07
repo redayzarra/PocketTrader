@@ -193,6 +193,43 @@ class TraderBot:
         logging.info(f"Trend for {asset} can't be found, not waiting any longer")
         return "no trend"
 
+    def instant_trend(self, asset, trend):
+        """
+        Check if the specified trend (long or short) is currently valid for the asset.
+
+        Args:
+            asset: The asset to check the trend for.
+            trend (str): The trend direction to check, either "long" or "short".
+
+        Returns:
+            bool: True if the specified trend is valid, False otherwise.
+        """
+        max_attempts = 10
+        attempt = 0
+
+        ema9 = ti.ema(data, 9)
+        ema26 = ti.ema(data, 26)
+        ema50 = ti.ema(data, 50)
+
+        while attempt <= max_attempts:
+            if (trend == "long") and (ema9 > ema26) and (ema26 > ema50):
+                logging.info(f"We found a long trend for {asset}")
+                return True
+            elif (trend == "short") and (ema9 < ema26) and (ema26 < ema50):
+                logging.info(f"We found a short trend for {asset}")
+                return True
+            else:
+                logging.info(
+                    f"Can't find trend for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                )
+                attempt += 1
+                time.sleep(60)
+
+        logging.warning(
+            f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
+        )
+        return False
+
     def run(self):
         """
         Starts running the trading bot.
