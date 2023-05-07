@@ -1,6 +1,6 @@
 # Import all libraries
 import sys
-from library import *
+from ARCHIVE.library import *
 from logger import *
 
 
