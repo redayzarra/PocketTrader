@@ -171,9 +171,9 @@ class TraderBot:
 
         while attempt < max_attempts:
             try:
-                ema9 = ti.ema(data, 9)
-                ema26 = ti.ema(data, 26)
-                ema50 = ti.ema(data, 50)
+                ema9 = data.ewm(span=9).mean()
+                ema26 = data.ewm(span=26).mean()
+                ema50 = data.ewm(span=50).mean()
 
                 logging.info(f"{asset} general trend EMAS: {ema9}, {ema26}, {ema50}")
 
@@ -196,13 +196,14 @@ class TraderBot:
         logging.info(f"Trend for {asset} can't be found, not waiting any longer")
         return "no trend"
 
-    def instant_trend(self, asset, trend):
+    def instant_trend(self, asset, trend, data):
         """
         Check if the specified trend (long or short) is currently valid for the asset.
 
         Args:
             asset: The asset to check the trend for.
             trend (str): The trend direction to check, either "long" or "short".
+            data (pandas.Series or pandas.DataFrame): The price data for the asset.
 
         Returns:
             bool: True if the specified trend is valid, False otherwise.
@@ -211,9 +212,9 @@ class TraderBot:
 
         for attempt in range(1, max_attempts + 1):
             try:
-                ema9 = ti.ema(data, 9)
-                ema26 = ti.ema(data, 26)
-                ema50 = ti.ema(data, 50)
+                ema9 = data.ewm(span=9).mean()
+                ema26 = data.ewm(span=26).mean()
+                ema50 = data.ewm(span=50).mean()
 
                 logging.info(f"{asset} instant trend EMAs: {ema9}, {ema26}, {ema50}")
 
