@@ -1,6 +1,6 @@
 from config import API_KEY, SECRET_KEY
 from PocketTrader import TraderBot
-from Strategies import MovingAverageCrossover
+import Strategies
 
 if __name__ == "__main__":
     # Instantiate the trading bot
