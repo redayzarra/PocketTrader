@@ -29,3 +29,24 @@ class Trader:
         logging.info(f"Trader initialized with ticker {ticker}")
         self.ticker = ticker
         self.api = api
+
+    def is_tradable(self, ticker):
+        """
+        Check if the given ticker is tradable.
+
+        Args:
+            ticker (str): The ticker symbol to check if it's tradable.
+
+        Returns:
+            bool: True if the ticker is tradable, False otherwise.
+        """
+        try:
+            if not ticker.tradable:
+                logging.info(f"{ticker} is NOT tradable!")
+                return False
+            else:
+                logging.info(f"{ticker} is tradable!")
+                return True
+        except:
+            logging.error(f"{ticker} is encountering some issues")
+            return False
