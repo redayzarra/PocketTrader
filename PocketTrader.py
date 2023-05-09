@@ -80,3 +80,32 @@ class Trader:
         except Exception as e:
             logging.error(f"The trend value doesn't make sense: {trend}")
             sys.exit()
+
+    def set_takeprofit(self, entry_price, trend):
+        """
+        Calculate the take profit based on the entry price and trend.
+
+        Args:
+            entry_price (float): The entry price of the stock.
+            trend (str): The trade direction ("long" or "short").
+
+        Returns:
+            float: The take profit price.
+
+        Raises:
+            ValueError: If an invalid trend is provided.
+        """
+        try:
+            if trend == "long":
+                take_profit = entry_price + (entry_price * config.takeProfitMargin)
+                logging.info(f"Take profit set for long at {take_profit:.2f}")
+                return take_profit
+            elif trend == "short":
+                take_profit = entry_price - (entry_price * config.takeProfitMargin)
+                logging.info(f"Take profit set for short at {take_profit:.2f}")
+                return take_profit
+            else:
+                raise ValueError
+        except Exception as e:
+            logging.error(f"The trend value is not understood: {trend}")
+            sys.exit()
