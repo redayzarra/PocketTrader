@@ -107,5 +107,30 @@ class Trader:
             else:
                 raise ValueError
         except Exception as e:
-            logging.error(f"The trend value is not understood: {trend}")
+            logging.error(f"The trend value doesn't make sense: {trend}")
             sys.exit()
+
+    def load_historical_data(self, ticker, interval, period):
+        """
+        Load historical stock data.
+
+        Args:
+            ticker (str): The stock ticker symbol.
+            interval (str): The time interval for data aggregation (e.g. '1m', '5m', '15m', '30m', '60m', '90m', '1h', '1d', '5d', '1wk', '1mo', '3mo').
+            period (str): The period for which to retrieve data (e.g. '1d', '5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'ytd', 'max').
+
+        Returns:
+            DataFrame: A pandas DataFrame containing the historical stock data.
+
+        Raises:
+            Exception: If there is an error while loading historical data.
+        """
+        try:
+            ticker_data = yf.Ticker(ticker)
+            historical_data = ticker_data.history(period=period, interval=interval)
+        except Exception as e:
+            logging.error("There are some issues with loading historical data")
+            logging.error(e)
+            sys.exit()
+
+        return historical_data
