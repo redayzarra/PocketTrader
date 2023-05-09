@@ -170,9 +170,11 @@ class TraderBot:
 
         while attempt < max_attempts:
             try:
-                ema9 = ti.ema(data, 9)
-                ema26 = ti.ema(data, 26)
-                ema50 = ti.ema(data, 50)
+                ema9 = data.ewm(span=9).mean()
+                ema26 = data.ewm(span=26).mean()
+                ema50 = data.ewm(span=50).mean()
+
+                logging.info(f"{asset} general trend EMAS: {ema9}, {ema26}, {ema50}")
 
                 # Determine the trend based on EMA values
                 if ema9 > ema26 and ema9 > ema50:
@@ -193,42 +195,134 @@ class TraderBot:
         logging.info(f"Trend for {asset} can't be found, not waiting any longer")
         return "no trend"
 
-    def instant_trend(self, asset, trend):
+    def instant_trend(self, asset, trend, data):
         """
         Check if the specified trend (long or short) is currently valid for the asset.
 
         Args:
             asset: The asset to check the trend for.
             trend (str): The trend direction to check, either "long" or "short".
+            data (pandas.Series or pandas.DataFrame): The price data for the asset.
 
         Returns:
             bool: True if the specified trend is valid, False otherwise.
         """
         max_attempts = 10
-        attempt = 0
 
-        ema9 = ti.ema(data, 9)
-        ema26 = ti.ema(data, 26)
-        ema50 = ti.ema(data, 50)
+        for attempt in range(1, max_attempts + 1):
+            try:
+                ema9 = data.ewm(span=9).mean()
+                ema26 = data.ewm(span=26).mean()
+                ema50 = data.ewm(span=50).mean()
 
-        while attempt <= max_attempts:
-            if (trend == "long") and (ema9 > ema26) and (ema26 > ema50):
-                logging.info(f"We found a long trend for {asset}")
-                return True
-            elif (trend == "short") and (ema9 < ema26) and (ema26 < ema50):
-                logging.info(f"We found a short trend for {asset}")
-                return True
-            else:
-                logging.info(
-                    f"Can't find trend for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                logging.info(f"{asset} instant trend EMAs: {ema9}, {ema26}, {ema50}")
+
+                if (trend == "long") and (ema9 > ema26) and (ema26 > ema50):
+                    logging.info(f"We found a long trend for {asset}")
+                    return True
+                elif (trend == "short") and (ema9 < ema26) and (ema26 < ema50):
+                    logging.info(f"We found a short trend for {asset}")
+                    return True
+                else:
+                    logging.info(
+                        f"Can't find trend for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                    )
+                    time.sleep(60)
+            except Exception as e:
+                logging.warning(
+                    f"Failed to find the {trend} trend for {asset} on attempt {attempt} due to error: {e}"
                 )
-                attempt += 1
-                time.sleep(60)
 
         logging.warning(
             f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
         )
         return False
+
+    def calculate_rsi(self, data, period=14):
+        """
+        Calculate the RSI for the given data and period.
+
+        Args:
+            data: The price data for the asset.
+            period (int, optional): The period to use for RSI calculation. Defaults to 14.
+
+        Returns:
+            float: The calculated RSI value, or None if an error occurred.
+        """
+        try:
+            rsi = ti.rsi(data, period)
+            return rsi
+        except Exception as e:
+            logging.error(f"Error calculating RSI: {e}")
+            return None
+
+    def rsi(self, asset, trend):
+        """
+        Analyze the RSI for the given asset and trend direction.
+
+        Args:
+            asset: The asset to analyze.
+            trend (str): The trend direction to check, either "long" or "short".
+
+        Returns:
+            bool: True if the RSI supports the specified trend, False otherwise.
+        """
+        logging.info("STARTING RSI ANALYSIS")
+
+        max_attempts = 10
+
+        for attempt in range(1, max_attempts + 1):
+            rsi = self.calculate_rsi(data)
+
+            if rsi is None:
+                logging.warning(f"Error calculating RSI for {asset}, attempt {attempt}")
+                time.sleep(30)
+                continue
+
+            logging.info(f"{asset} rsi = {rsi}")
+
+            if (trend == "long") and (rsi > 50) and (rsi < 80):
+                logging.info(f"We found a long trend for {asset}")
+                return True
+            elif (trend == "short") and (rsi < 50) and (rsi > 20):
+                logging.info(f"We found a short trend for {asset}")
+                return True
+            else:
+                logging.info(
+                    f"Can't find rsi for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                )
+                time.sleep(30)
+
+        logging.warning(
+            f"Failed to find the {trend} trend for {asset} after {max_attempts} attempts"
+        )
+        return False
+
+    def stochastic(self, asset, trend):
+        logging.info("STARTING RSI ANALYSIS")
+
+        attempt = 1
+        maxAttempts = 10
+        
+        try: 
+            while True:
+                
+                stoch_k, stoch_d, = ti.stoch(high, low, close, 9, 6, 9)
+                
+                logging.info(f"{asset} rsi = {rsi}")
+                
+                if (trend == "long") and (stoch_k > stoch_d) and (stoch_k < 80):
+                    logging.info(f"We found a long trend for {asset}")
+                    return True
+                elif (trend == "short") and (rsi < 50) and (rsi > 20):
+                    logging.info(f"We found a short trend for {asset}")
+                    return True
+                else:
+                    logging.info(
+                        f"Can't find rsi for {asset} just yet. Attempt {attempt} of {max_attempts}"
+                    )
+                    time.sleep(30)
+
 
     def run(self):
         """
