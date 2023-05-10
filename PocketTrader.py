@@ -210,3 +210,33 @@ class Trader:
             logging.error("Something happened when submitting order")
             logging.error(e)
             sys.exit()
+
+    def cancel_pending_order(self, ticker):
+        """
+        Cancel a pending order for the given ticker, retrying if necessary.
+
+        Args:
+            ticker (str): The asset's ticker symbol.
+
+        Returns:
+            bool: True if the order was cancelled successfully, False otherwise.
+        """
+        logging.info(f"Cancelling order {self.order_id} for {ticker}")
+
+        for attempt in range(1, config.maxAttemptsCPO + 1):
+            try:
+                self.api.cancel_order(self.order_id)
+                logging.info(f"Order {self.order_id} cancelled correctly")
+                return True
+            except Exception as e:
+                logging.warning(
+                    f"Attempt {attempt}: Order could not be cancelled, retrying... ({e})"
+                )
+                time.sleep(config.sleepTimeCPO)
+
+        logging.error(
+            f"The order could not be cancelled after {config.maxAttemptsCPO} attempts, cancelling all orders..."
+        )
+        logging.info(f"Client order ID: {self.order_id}")
+        self.api.cancel_all_orders()
+        sys.exit()
