@@ -134,3 +134,19 @@ class Trader:
             sys.exit()
 
         return historical_data
+    
+    
+    def get_open_positions(self, asset_id):
+        """
+        Get open positions for a given asset ID.
+
+        Args:
+            asset_id (str): The asset's unique identifier.
+
+        Returns:
+            bool: True if there is an open position for the asset, False otherwise.
+        """
+        positions = self.api.list_positions()
+        return any(position.symbol == asset_id for position in positions)
+    
+    
