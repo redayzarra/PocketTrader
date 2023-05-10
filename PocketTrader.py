@@ -134,8 +134,7 @@ class Trader:
             sys.exit()
 
         return historical_data
-    
-    
+
     def get_open_positions(self, asset_id):
         """
         Get open positions for a given asset ID.
@@ -148,5 +147,66 @@ class Trader:
         """
         positions = self.api.list_positions()
         return any(position.symbol == asset_id for position in positions)
-    
-    
+
+    def submit_order(
+        self, order_type, trend, ticker, shares_qty, current_price, exit=False
+    ):
+        """
+        Submit an order for a given asset.
+
+        Args:
+            order_type (str): The type of order (e.g., 'limit', 'market').
+            trend (str): The trade direction ('long' or 'short').
+            ticker (str): The asset's ticker symbol.
+            shares_qty (int): The number of shares for the order.
+            current_price (float): The current price of the asset.
+            exit (bool, optional): Whether the order is an exit order. Defaults to False.
+
+        Returns:
+            bool: True if the order was submitted successfully, False otherwise.
+        """
+        logging.info(f"Submitting {trend} order for {ticker}")
+
+        # Determine the side and limit price based on the trend and exit status
+        side = None
+        limit_price = None
+
+        if trend in ("long", "short") and not exit:
+            side = "buy" if trend == "long" else "sell"
+            limit_price = round(
+                current_price * (1 + (1 if trend == "long" else -1) * config.maxVar), 2
+            )
+        elif trend in ("long", "short") and exit:
+            side = "sell" if trend == "long" else "buy"
+
+        if side is None:
+            logging.error("Trend was not understood")
+            sys.exit()
+
+        try:
+            order_params = {
+                "symbol": ticker,
+                "qty": shares_qty,
+                "side": side,
+                "type": order_type,
+                "time_in_force": "gtc",
+            }
+
+            if order_type == "limit":
+                logging.info(
+                    f"Current price: {current_price:.2f} // Limit price: {limit_price:.2f}"
+                )
+                order_params["limit_price"] = limit_price
+
+            order = self.api.submit_order(**order_params)
+            self.order_id = order.id
+
+            logging.info(f"{trend} order submitted correctly!")
+            logging.info(f"{shares_qty} shares {side} for {ticker}")
+            logging.info(f"Client order ID: {self.order_id}")
+            return True
+
+        except Exception as e:
+            logging.error("Something happened when submitting order")
+            logging.error(e)
+            sys.exit()
