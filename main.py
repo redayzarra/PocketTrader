@@ -4,7 +4,8 @@ import time
 import config
 from PocketTrader import Trader
 from logger import *
-import alpaca as tradeapi
+import alpaca
+from alpaca.trading.client import TradingClient
 
 
 def check_account_status(api):
@@ -47,9 +48,10 @@ def is_asset_tradable(api, ticker):
 
 
 def main():
-    api = tradeapi.REST(
-        config.API_KEY, config.API_SECRET_KEY, config.API_URL, api_version="v2"
-    )
+    
+
+# paper=True enables paper trading
+    api = TradingClient('api-key', 'secret-key', paper=True)
 
     initialize_logging()
 

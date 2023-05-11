@@ -145,8 +145,12 @@ class Trader:
         Returns:
             bool: True if there is an open position for the asset, False otherwise.
         """
-        positions = self.api.list_positions()
-        return any(position.symbol == asset_id for position in positions)
+        try:
+            position = self.api.get_open_position(asset_id)
+            return True
+        except Exception as e:
+            logging.info(f"No open position found for {asset_id}: {e}")
+            return False
 
     def submit_order(
         self, order_type, trend, ticker, shares_qty, current_price, exit=False
@@ -240,3 +244,35 @@ class Trader:
         logging.info(f"Client order ID: {self.order_id}")
         self.api.cancel_all_orders()
         sys.exit()
+
+    def check_position(self, ticker, do_not_find=False):
+        """
+        Check if a position exists for the given ticker.
+
+        Args:
+            ticker (str): The asset's ticker symbol.
+            do_not_find (bool, optional): If True, the function returns False if the position is not found.
+                                        Defaults to False.
+
+        Returns:
+            bool: True if the position is found, False otherwise.
+        """
+        for attempt in range(1, config.maxAttemptsCP + 1):
+            try:
+                position = self.api.get_position(ticker)
+                current_price = float(position.current_price)
+                logging.info(
+                    f"The position was found. Current price is: {current_price:.2f}"
+                )
+                return True
+            except Exception as e:
+                if do_not_find:
+                    logging.info("Position not found, this is good!")
+                    return False
+
+                logging.info(f"Exception: {e}")
+                logging.info("Position not found, waiting for it...")
+                time.sleep(config.sleepTimeCP)
+
+        logging.info(f"Position not found for {ticker}, not waiting any more")
+        return False
