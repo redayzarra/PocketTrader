@@ -48,10 +48,8 @@ def is_asset_tradable(api, ticker):
 
 
 def main():
-    
-
-# paper=True enables paper trading
-    api = TradingClient('api-key', 'secret-key', paper=True)
+    # paper=True enables paper trading
+    api = TradingClient("api-key", "secret-key", paper=True)
 
     initialize_logging()
 
