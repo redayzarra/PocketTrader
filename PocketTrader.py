@@ -272,7 +272,45 @@ class Trader:
 
                 logging.info(f"Exception: {e}")
                 logging.info("Position not found, waiting for it...")
-                time.sleep(config.sleepTimeCP)
+                time.sleep(config.sleepTimeME)
 
         logging.info(f"Position not found for {ticker}, not waiting any more")
         return False
+
+    def get_shares_amount(self, asset_price):
+        """
+        Calculate the number of shares to buy/sell based on the asset price and available equity.
+
+        Args:
+            asset_price (float): The current price of the asset.
+
+        Returns:
+            int: The number of shares to buy/sell.
+
+        Raises:
+            Exception: If there is an error while calculating the number of shares.
+        """
+        logging.info("Calculating shares amount")
+
+        try:
+            # Get the total equity available
+            account = self.api.get_account()
+            equity = float(account.equity)
+
+            # Calculate the number of shares
+            shares_quantity = int(config.maxSpentEquity / asset_price)
+
+            # Check if sufficient equity is available
+            if equity - shares_quantity * asset_price > 0:
+                logging.info(f"Total shares to operate with: {shares_quantity}")
+                return shares_quantity
+            else:
+                logging.info(
+                    f"Cannot spend that amount, remaining equity is {equity:.2f}"
+                )
+                sys.exit()
+
+        except Exception as e:
+            logging.error("An error occurred while calculating the shares amount")
+            logging.error(e)
+            sys.exit()
