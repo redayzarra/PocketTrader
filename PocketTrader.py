@@ -344,3 +344,33 @@ class Trader:
 
         logging.error(f"Position not found for {ticker}, not waiting any more")
         raise Exception("Position not found after maximum attempts")
+
+    def get_avg_entry_price(self, ticker):
+        """
+        Get the average entry price of a ticker with an open position.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+
+        Returns:
+            float: The average entry price of the asset.
+
+        Raises:
+            Exception: If the position is not found after the maximum number of attempts.
+        """
+        for attempt in range(1, config.maxAttemptsGAEP + 1):
+            try:
+                position = self.api.get_position(ticker)
+                avg_entry_price = float(position.avg_entry_price)
+                logging.info(
+                    f"The position was checked. Average entry price is: {avg_entry_price:.2f}"
+                )
+                return avg_entry_price
+            except Exception as e:
+                logging.info(
+                    "Position not found, cannot check price, waiting for it..."
+                )
+                time.sleep(config.sleepTimeGAEP)  # wait a defined time and retry
+
+        logging.error(f"Position not found for {ticker}, not waiting any more")
+        raise Exception("Position not found after maximum attempts")
