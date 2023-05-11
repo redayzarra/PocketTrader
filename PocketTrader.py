@@ -314,3 +314,33 @@ class Trader:
             logging.error("An error occurred while calculating the shares amount")
             logging.error(e)
             sys.exit()
+
+    def get_current_price(self, ticker):
+        """
+        Get the current price of a ticker with an open position.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+
+        Returns:
+            float: The current price of the asset.
+
+        Raises:
+            Exception: If the position is not found after the maximum number of attempts.
+        """
+        for attempt in range(1, config.maxAttemptsGCP + 1):
+            try:
+                position = self.api.get_position(ticker)
+                current_price = float(position.current_price)
+                logging.info(
+                    f"The position was checked. Current price is: {current_price:.2f}"
+                )
+                return current_price
+            except Exception as e:
+                logging.info(
+                    "Position not found, cannot check price, waiting for it..."
+                )
+                time.sleep(config.sleepTimeGCP)  # wait a defined time and retry
+
+        logging.error(f"Position not found for {ticker}, not waiting any more")
+        raise Exception("Position not found after maximum attempts")
