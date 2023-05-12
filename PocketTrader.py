@@ -573,3 +573,50 @@ class Trader:
 
         logging.info(f"Trend NOT detected and timeout reached for {ticker}")
         return False
+
+    def check_stochastic_crossing(self, ticker, trend):
+        """
+        Check whether the Stochastic curves have crossed or not depending on the trend.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+            trend (str): The expected trend - 'long' or 'short'.
+
+        Returns:
+            bool: True if the Stochastic curves have crossed, False otherwise.
+
+        Raises:
+            Exception: If an error occurs during the check.
+        """
+        logging.info("Checking stochastic crossing...")
+
+        # period = 50 samples of 5 minutes = less than 1 day (8h) of data
+        data = self.load_historical_data(ticker, interval="5m", period="1d")
+
+        # calculate the Stochastic
+        stoch_k, stoch_d = ti.stoch(
+            data.High.values, data.Low.values, data.Close.values, 9, 6, 9
+        )
+        stoch_k, stoch_d = stoch_k[-1], stoch_d[-1]
+
+        logging.info(
+            f"{ticker} stochastic = [K_FAST:{stoch_k:.2f},D_SLOW:{stoch_d:.2f}]"
+        )
+
+        try:
+            if (trend == "long" and stoch_k <= stoch_d) or (
+                trend == "short" and stoch_k >= stoch_d
+            ):
+                logging.info(
+                    f"\nSTOCHASTIC CURVES CROSSED: {trend}, k={stoch_k:.2f}, d={stoch_d:.2f}"
+                )
+                return True
+            else:
+                logging.info("Stochastic curves have not crossed")
+                return False
+
+        except Exception as e:
+            logging.error(
+                f"Error occurred while checking Stochastic crossing for {ticker}: {e}"
+            )
+            return False
