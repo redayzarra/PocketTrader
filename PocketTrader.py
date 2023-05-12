@@ -472,3 +472,47 @@ class Trader:
 
         logging.info(f"Trend NOT detected and timeout reached for {ticker}")
         return False
+
+    def get_rsi(self, ticker, trend):
+        """
+        Perform RSI analysis.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+            trend (str): The expected trend - 'long' or 'short'.
+
+        Returns:
+            bool: True if trend is confirmed by RSI, False otherwise.
+
+        Raises:
+            Exception: If an error occurs during the RSI analysis.
+        """
+        logging.info("\nRSI ANALYSIS entered")
+
+        for attempt in range(1, config.maxAttemptsRSI + 1):
+            try:
+                # period = 50 samples of 5 minutes = less than 1 day (8h) of data
+                data = self.load_historical_data(ticker, interval="5m", period="1d")
+
+                # calculate the RSI
+                rsi = ti.rsi(data.Close.values, 14)[-1]  # it uses 14-sample window
+
+                logging.info(f"{ticker} rsi = [{rsi:.2f}]")
+
+                if (trend == "long" and 50 < rsi < 80) or (
+                    trend == "short" and 20 < rsi < 50
+                ):
+                    logging.info(f"{trend.capitalize()} trend confirmed for {ticker}")
+                    return True
+                else:
+                    logging.info(f"Trend not clear for {ticker}, waiting...")
+                    time.sleep(config.sleepTimeRSI)
+
+            except Exception as e:
+                logging.error(
+                    f"Error occurred while performing RSI analysis for {ticker}: {e}"
+                )
+                sys.exit()
+
+        logging.info(f"Trend NOT detected and timeout reached for {ticker}")
+        return False
