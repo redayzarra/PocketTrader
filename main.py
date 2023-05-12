@@ -1,11 +1,14 @@
 # encoding: utf-8
 import sys
 import time
-import config
-from PocketTrader import Trader
-from logger import *
-import alpaca
+
+# Importing API
 from alpaca.trading.client import TradingClient
+
+# Importing necessary files
+import config
+from logger import *
+from PocketTrader import Trader
 
 
 def check_account_status(api):
@@ -24,7 +27,7 @@ def cancel_all_orders(api):
     logging.info("Cancelling all orders...")
 
     try:
-        api.cancel_all_orders()
+        api.cancel_orders()
         logging.info("All orders cancelled")
     except Exception as e:
         logging.error("Could not cancel all orders")
@@ -51,17 +54,17 @@ def main():
     # paper=True enables paper trading
     api = TradingClient("api-key", "secret-key", paper=True)
 
-    initialize_logging()
+    initialize_logging()  # yes
 
-    check_account_status(api)
+    check_account_status(api)  # yes
 
-    cancel_all_orders(api)
+    cancel_all_orders(api)  # yes
 
-    ticker = "INSERT TICKER"
+    ticker = input("INSERT TICKER: ")  # input
 
-    is_asset_tradable(api, ticker)
+    is_asset_tradable(api, ticker)  # yes
 
-    trader = Trader(ticker, api)
+    trader = Trader(ticker, api)  # great
 
     while True:
         trading_success = trader.run(ticker)
