@@ -137,23 +137,22 @@ class Trader:
 
         return historical_data
 
+    def get_open_positions(self, asset_id, api):
+        """
+        Get open positions for a given asset ID.
 
-def get_open_positions(self, asset_id, api):
-    """
-    Get open positions for a given asset ID.
+        Args:
+            asset_id (str): The asset's unique identifier.
 
-    Args:
-        asset_id (str): The asset's unique identifier.
-
-    Returns:
-        bool: True if there is an open position for the asset, False otherwise.
-    """
-    try:
-        position = api.get_open_position(asset_id)
-        return True
-    except APIError as e:
-        logging.info(f"No open position found for {asset_id}: {e}")
-        return False
+        Returns:
+            bool: True if there is an open position for the asset, False otherwise.
+        """
+        try:
+            position = api.get_open_position(asset_id)
+            return True
+        except APIError as e:
+            logging.info(f"No open position found for {asset_id}: {e}")
+            return False
 
     def submit_order(
         self, order_type, trend, ticker, shares_qty, current_price, exit=False
