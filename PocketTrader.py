@@ -689,3 +689,85 @@ class Trader:
         except Exception as e:
             logging.error(f"Error occurred while in position mode for {ticker}: {e}")
             return False
+
+    def run(self, ticker):
+        """
+        Run the trading operation.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+        """
+        logging.info("Running trading operation...")
+
+        while True:
+            # Check if there is an open position with the ticker
+            if self.check_position(ticker, do_not_find=True):
+                logging.info(
+                    f"There is already an open position with {ticker}! Aborting..."
+                )
+                return False
+
+            # Find general trend
+            trend = self.get_general_trend(ticker)
+            if not trend:
+                logging.info(f"No general trend found for {ticker}! Aborting...")
+                return False
+
+            # Confirm instant trend
+            if not self.get_instant_trend(ticker, trend):
+                logging.info("The instant trend is not confirmed. Retrying...")
+                continue
+
+            # Perform RSI and STOCHASTIC analysis
+            if not self.get_rsi(ticker, trend) or not self.get_stochastic(
+                ticker, trend
+            ):
+                logging.info(
+                    "The RSI or STOCHASTIC analysis is not confirmed. Retrying..."
+                )
+                continue
+
+            logging.info("All filtering passed, carrying on with the order!")
+
+            # Get current price
+            current_price = round(
+                float(
+                    self.load_historical_data(
+                        ticker, interval="5m", period="1d"
+                    ).Close.values[-1]
+                ),
+                2,
+            )
+
+            # Decide the total amount to invest
+            shares_qty = self.get_shares_amount(current_price)
+
+            logging.info(f"DESIRED ENTRY PRICE: {current_price:.2f}")
+
+            # Submit limit order
+            if not self.submit_order("limit", trend, ticker, shares_qty, current_price):
+                continue
+
+            # Check position
+            if not self.check_position(ticker):
+                self.cancel_pending_order(ticker)
+                continue
+
+            # Enter position mode
+            successful_operation = self.enter_position_mode(ticker, trend)
+
+            # Submit market order to exit
+            self.submit_order(
+                "market", trend, ticker, shares_qty, current_price, exit=True
+            )
+
+            # Check the position is cleared
+            while not self.check_position(ticker, do_not_find=True):
+                logging.info("WARNING! THE POSITION SHOULD BE CLOSED! Retrying...")
+                time.sleep(config.sleepTimeCP)  # wait 10 seconds
+
+            # End of execution
+            return successful_operation
