@@ -374,3 +374,53 @@ class Trader:
 
         logging.error(f"Position not found for {ticker}, not waiting any more")
         raise Exception("Position not found after maximum attempts")
+
+    def get_general_trend(self, ticker):
+        """
+        Get general trend: detect interesting trend (UP / DOWN / NO TREND)
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+
+        Returns:
+            str: Trend direction - 'long', 'short', or 'no trend'.
+
+        Raises:
+            Exception: If no trend is detected after maximum attempts.
+        """
+        logging.info("\nGENERAL TREND ANALYSIS entered")
+
+        for attempt in range(1, config.maxAttemptsGGT + 1):
+            try:
+                # period = 50 samples of 30 minutes = around 5 days (8h each) of data
+                # ask for 30 min candles
+                data = self.load_historical_data(ticker, interval="30m", period="5d")
+                close = data.Close.values
+
+                # calculate EMAs
+                ema9 = ti.ema(close, 9)[-1]
+                ema26 = ti.ema(close, 26)[-1]
+                ema50 = ti.ema(close, 50)[-1]
+
+                logging.info(
+                    f"{ticker} general trend EMAs = [EMA9:{ema9:.2f}, EMA26:{ema26:.2f}, EMA50:{ema50:.2f}]"
+                )
+
+                # checking EMAs relative position
+                if (ema50 < ema26) and (ema26 < ema9):
+                    logging.info(f"Trend detected for {ticker}: long")
+                    return "long"
+                elif (ema50 > ema26) and (ema26 > ema9):
+                    logging.info(f"Trend detected for {ticker}: short")
+                    return "short"
+                else:
+                    logging.info(f"Trend not clear for {ticker}, waiting...")
+                    time.sleep(config.sleepTimeGGT * config.maxAttemptsGGT)
+
+            except Exception as e:
+                logging.error(f"Error occurred while detecting trend for {ticker}: {e}")
+                continue
+
+        logging.info(f"Trend NOT detected and timeout reached for {ticker}")
+        raise Exception("Trend not detected after maximum attempts")
+
