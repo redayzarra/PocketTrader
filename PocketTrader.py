@@ -7,10 +7,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 # Import fun libraries
-import alpaca
 import numpy as np
 import pandas as pd
-import pytz
 import tulipy as ti
 import yfinance as yf  # Not needed, I'll figure this out later
 
@@ -31,7 +29,7 @@ class Trader:
         self.ticker = ticker
         self.api = api
 
-    def is_tradable(self, ticker):
+    def is_tradable(self, ticker, api):
         """
         Check if the given ticker is tradable.
 
@@ -42,7 +40,8 @@ class Trader:
             bool: True if the ticker is tradable, False otherwise.
         """
         try:
-            if not ticker.tradable:
+            asset = api.get_asset(ticker)
+            if not asset.tradable:
                 logging.info(f"{ticker} is NOT tradable!")
                 return False
             else:
