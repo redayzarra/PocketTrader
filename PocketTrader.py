@@ -424,3 +424,51 @@ class Trader:
         logging.info(f"Trend NOT detected and timeout reached for {ticker}")
         raise Exception("Trend not detected after maximum attempts")
 
+    def get_instant_trend(self, ticker, trend):
+        """
+        Get instant trend: confirm the trend detected by GT analysis.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+            trend (str): The expected trend - 'long' or 'short'.
+
+        Returns:
+            bool: True if trend is confirmed, False otherwise.
+
+        Raises:
+            Exception: If an error occurs during the trend detection.
+        """
+        logging.info("\nINSTANT TREND ANALYSIS entered")
+
+        for attempt in range(1, config.maxAttemptsGIT + 1):
+            try:
+                # period = 50 samples of 5 minutes = less than 1 day (8h) of data
+                data = self.load_historical_data(ticker, interval="5m", period="1d")
+                close = data.Close.values
+
+                # calculate the EMAs
+                ema9 = ti.ema(close, 9)[-1]
+                ema26 = ti.ema(close, 26)[-1]
+                ema50 = ti.ema(close, 50)[-1]
+
+                logging.info(
+                    f"{ticker} instant trend EMAs = [EMA9:{ema9:.2f}, EMA26:{ema26:.2f}, EMA50:{ema50:.2f}]"
+                )
+
+                if (trend == "long" and ema9 > ema26 > ema50) or (
+                    trend == "short" and ema9 < ema26 < ema50
+                ):
+                    logging.info(f"{trend.capitalize()} trend confirmed for {ticker}")
+                    return True
+                else:
+                    logging.info(f"Trend not clear for {ticker}, waiting...")
+                    time.sleep(config.sleepTimeGIT)
+
+            except Exception as e:
+                logging.error(
+                    f"Error occurred while confirming instant trend for {ticker}: {e}"
+                )
+                sys.exit()
+
+        logging.info(f"Trend NOT detected and timeout reached for {ticker}")
+        return False
