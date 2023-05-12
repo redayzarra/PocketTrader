@@ -6,6 +6,9 @@ import time
 from datetime import datetime, timedelta
 from enum import Enum
 
+# Importing API
+from alpaca.common.exceptions import APIError
+
 # Import fun libraries
 import numpy as np
 import pandas as pd
@@ -125,7 +128,7 @@ class Trader:
             Exception: If there is an error while loading historical data.
         """
         try:
-            ticker_data = yf.Ticker(ticker)
+            ticker_data = yf.Ticker(ticker)  # We can change this out for Alpaca API
             historical_data = ticker_data.history(period=period, interval=interval)
         except Exception as e:
             logging.error("There are some issues with loading historical data")
@@ -134,22 +137,23 @@ class Trader:
 
         return historical_data
 
-    def get_open_positions(self, asset_id):
-        """
-        Get open positions for a given asset ID.
 
-        Args:
-            asset_id (str): The asset's unique identifier.
+def get_open_positions(self, asset_id, api):
+    """
+    Get open positions for a given asset ID.
 
-        Returns:
-            bool: True if there is an open position for the asset, False otherwise.
-        """
-        try:
-            position = self.api.get_open_position(asset_id)
-            return True
-        except Exception as e:
-            logging.info(f"No open position found for {asset_id}: {e}")
-            return False
+    Args:
+        asset_id (str): The asset's unique identifier.
+
+    Returns:
+        bool: True if there is an open position for the asset, False otherwise.
+    """
+    try:
+        position = api.get_open_position(asset_id)
+        return True
+    except APIError as e:
+        logging.info(f"No open position found for {asset_id}: {e}")
+        return False
 
     def submit_order(
         self, order_type, trend, ticker, shares_qty, current_price, exit=False
