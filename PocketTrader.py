@@ -2,20 +2,20 @@
 import math
 import os
 import sys
-from enum import Enum
 import time
 from datetime import datetime, timedelta
+from enum import Enum
 
 # Import fun libraries
+import alpaca
 import numpy as np
 import pandas as pd
 import pytz
 import tulipy as ti
-import yfinance as yf  # Not needed
-import alpaca
+import yfinance as yf  # Not needed, I'll figure this out later
 
-from logger import *
 import config
+from logger import *
 
 
 class Trader:
