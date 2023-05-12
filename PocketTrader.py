@@ -620,3 +620,72 @@ class Trader:
                 f"Error occurred while checking Stochastic crossing for {ticker}: {e}"
             )
             return False
+
+    def enter_position_mode(self, ticker, trend):
+        """
+        Check the conditions in parallel once inside the position.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+            trend (str): The expected trend - 'long' or 'short'.
+
+        Returns:
+            bool: True if conditions for exit are met, False otherwise.
+
+        Raises:
+            Exception: If an error occurs during the check.
+        """
+        logging.info("Entering position mode...")
+
+        # Get average entry price
+        entry_price = self.get_avg_entry_price(ticker)
+
+        # Set the take profit
+        take_profit = self.set_takeprofit(entry_price, trend)
+
+        # Set the stop loss
+        stop_loss = self.set_stoploss(entry_price, trend)
+
+        try:
+            for attempt in range(1, config.maxAttemptsEPM + 1):
+                self.current_price = self.get_current_price(ticker)
+
+                # Check if take profit or stop loss is met
+                if (
+                    trend == "long"
+                    and (
+                        self.current_price >= take_profit
+                        or self.current_price <= stop_loss
+                    )
+                ) or (
+                    trend == "short"
+                    and (
+                        self.current_price <= take_profit
+                        or self.current_price >= stop_loss
+                    )
+                ):
+                    logging.info(
+                        f'{"Take profit" if self.current_price >= take_profit else "Stop loss"} met at {self.current_price:.2f}. Current price is {self.current_price:.2f}'
+                    )
+                    return True
+
+                # Check stochastic crossing
+                elif self.check_stochastic_crossing(ticker, trend):
+                    logging.info(
+                        f"Stochastic curves crossed. Current price is {self.current_price:.2f}"
+                    )
+                    return True
+
+                # Waiting inside position
+                logging.info(f"Waiting inside position, attempt #{attempt}")
+                logging.info(
+                    f"SL {stop_loss:.2f} <-- {self.current_price:.2f} --> {take_profit:.2f} TP"
+                )
+                time.sleep(config.sleepTimeEPM)
+
+            logging.info("Timeout reached at enter position, too late")
+            return False
+
+        except Exception as e:
+            logging.error(f"Error occurred while in position mode for {ticker}: {e}")
+            return False
