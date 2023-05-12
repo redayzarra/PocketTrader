@@ -516,3 +516,60 @@ class Trader:
 
         logging.info(f"Trend NOT detected and timeout reached for {ticker}")
         return False
+
+    def get_stochastic(self, ticker, trend):
+        """
+        Perform Stochastic analysis.
+
+        Args:
+            ticker (str): The ticker symbol of the asset.
+            trend (str): The expected trend - 'long' or 'short'.
+
+        Returns:
+            bool: True if trend is confirmed by Stochastic, False otherwise.
+
+        Raises:
+            Exception: If an error occurs during the Stochastic analysis.
+        """
+        logging.info("\nSTOCHASTIC ANALYSIS entered")
+
+        for attempt in range(1, config.maxAttemptsSTC + 1):
+            try:
+                # period = 50 samples of 5 minutes = less than 1 day (8h) of data
+                data = self.load_historical_data(ticker, interval="5m", period="1d")
+
+                # calculate the Stochastic
+                stoch_k, stoch_d = ti.stoch(
+                    data.High.values, data.Low.values, data.Close.values, 9, 6, 9
+                )
+                stoch_k, stoch_d = stoch_k[-1], stoch_d[-1]
+
+                logging.info(
+                    f"{ticker} stochastic = [K_FAST:{stoch_k:.2f},D_SLOW:{stoch_d:.2f}]"
+                )
+
+                if (
+                    trend == "long"
+                    and stoch_k > stoch_d
+                    and stoch_k < 80
+                    and stoch_d < 80
+                ) or (
+                    trend == "short"
+                    and stoch_k < stoch_d
+                    and stoch_k > 20
+                    and stoch_d > 20
+                ):
+                    logging.info(f"{trend.capitalize()} trend confirmed for {ticker}")
+                    return True
+                else:
+                    logging.info(f"Trend not clear for {ticker}, waiting...")
+                    time.sleep(config.sleepTimeSTC)
+
+            except Exception as e:
+                logging.error(
+                    f"Error occurred while performing Stochastic analysis for {ticker}: {e}"
+                )
+                sys.exit()
+
+        logging.info(f"Trend NOT detected and timeout reached for {ticker}")
+        return False
