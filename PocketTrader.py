@@ -331,7 +331,7 @@ class Trader:
         """
         for attempt in range(1, config.maxAttemptsGCP + 1):
             try:
-                position = self.api.get_position(ticker)
+                position = self.api.get_open_position(ticker)
                 current_price = float(position.current_price)
                 logging.info(
                     f"The position was checked. Current price is: {current_price:.2f}"
@@ -361,7 +361,7 @@ class Trader:
         """
         for attempt in range(1, config.maxAttemptsGAEP + 1):
             try:
-                position = self.api.get_position(ticker)
+                position = self.api.get_open_position(ticker)
                 avg_entry_price = float(position.avg_entry_price)
                 logging.info(
                     f"The position was checked. Average entry price is: {avg_entry_price:.2f}"
@@ -395,7 +395,7 @@ class Trader:
             try:
                 # period = 50 samples of 30 minutes = around 5 days (8h each) of data
                 # ask for 30 min candles
-                data = self.load_historical_data(ticker, interval="30m", period="5d")
+                data = self.load_historical_data(ticker, interval="30m", period="5d") # Gotta change this to use Alpaca
                 close = data.Close.values
 
                 # calculate EMAs
