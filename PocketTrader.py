@@ -8,6 +8,8 @@ from enum import Enum
 
 # Importing API
 from alpaca.common.exceptions import APIError
+from alpaca.trading.models import OrderSide, OrderType, TimeInForce
+from alpaca.trading.requests import OrderRequest
 
 # Import fun libraries
 import numpy as np
@@ -32,7 +34,7 @@ class Trader:
         self.ticker = ticker
         self.api = api
 
-    def is_tradable(self, ticker, api):
+    def is_tradable(self, ticker):
         """
         Check if the given ticker is tradable.
 
@@ -43,7 +45,7 @@ class Trader:
             bool: True if the ticker is tradable, False otherwise.
         """
         try:
-            asset = api.get_asset(ticker)
+            asset = self.api.get_asset(ticker)
             if not asset.tradable:
                 logging.info(f"{ticker} is NOT tradable!")
                 return False
@@ -137,7 +139,7 @@ class Trader:
 
         return historical_data
 
-    def get_open_positions(self, asset_id, api):
+    def get_open_positions(self, asset_id):
         """
         Get open positions for a given asset ID.
 
@@ -148,7 +150,7 @@ class Trader:
             bool: True if there is an open position for the asset, False otherwise.
         """
         try:
-            position = api.get_open_position(asset_id)
+            position = self.api.get_open_position(asset_id)
             return True
         except APIError as e:
             logging.info(f"No open position found for {asset_id}: {e}")
@@ -186,36 +188,34 @@ class Trader:
             side = "sell" if trend == "long" else "buy"
 
         if side is None:
-            logging.error("Trend was not understood")
-            sys.exit()
+            raise ValueError("Trend must be 'long' or 'short'")
 
         try:
-            order_params = {
-                "symbol": ticker,
-                "qty": shares_qty,
-                "side": side,
-                "type": order_type,
-                "time_in_force": "gtc",
-            }
+            order_data = OrderRequest(
+                symbol=ticker,
+                qty=shares_qty,
+                side=side,
+                type=order_type,
+                time_in_force=TimeInForce.GTC,
+            )
 
             if order_type == "limit":
                 logging.info(
                     f"Current price: {current_price:.2f} // Limit price: {limit_price:.2f}"
                 )
-                order_params["limit_price"] = limit_price
+                order_data.limit_price = limit_price
 
-            order = self.api.submit_order(**order_params)
+            order = self.api.submit_order(order_data)
             self.order_id = order.id
 
-            logging.info(f"{trend} order submitted correctly!")
-            logging.info(f"{shares_qty} shares {side} for {ticker}")
-            logging.info(f"Client order ID: {self.order_id}")
-            return True
-
-        except Exception as e:
-            logging.error("Something happened when submitting order")
+        except APIError as e:
+            logging.error("APIError occurred when submitting order")
             logging.error(e)
-            sys.exit()
+            return False
+        except Exception as e:
+            logging.error("An unexpected error occurred when submitting order")
+            logging.error(e)
+            return False
 
     def cancel_pending_order(self, ticker):
         """
