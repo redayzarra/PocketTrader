@@ -231,7 +231,7 @@ class Trader:
 
         for attempt in range(1, config.maxAttemptsCPO + 1):
             try:
-                self.api.cancel_order(self.order_id)
+                self.api.cancel_order_by_id(self.order_id)
                 logging.info(f"Order {self.order_id} cancelled correctly")
                 return True
             except Exception as e:
@@ -241,10 +241,9 @@ class Trader:
                 time.sleep(config.sleepTimeCPO)
 
         logging.error(
-            f"The order could not be cancelled after {config.maxAttemptsCPO} attempts, cancelling all orders..."
+            f"The order could not be cancelled after {config.maxAttemptsCPO} attempts"
         )
         logging.info(f"Client order ID: {self.order_id}")
-        self.api.cancel_all_orders()
         sys.exit()
 
     def check_position(self, ticker, do_not_find=False):
