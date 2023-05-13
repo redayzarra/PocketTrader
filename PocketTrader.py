@@ -296,7 +296,7 @@ class Trader:
         try:
             # Get the total equity available
             account = self.api.get_account()
-            equity = float(account.equity)
+            equity = float(account.equity) if account.equity else 0
 
             # Calculate the number of shares
             shares_quantity = int(config.maxSpentEquity / asset_price)
@@ -306,15 +306,15 @@ class Trader:
                 logging.info(f"Total shares to operate with: {shares_quantity}")
                 return shares_quantity
             else:
-                logging.info(
+                logging.error(
                     f"Cannot spend that amount, remaining equity is {equity:.2f}"
                 )
-                sys.exit()
+                return 0
 
         except Exception as e:
             logging.error("An error occurred while calculating the shares amount")
             logging.error(e)
-            sys.exit()
+            return 0
 
     def get_current_price(self, ticker):
         """
