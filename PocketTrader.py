@@ -395,7 +395,9 @@ class Trader:
             try:
                 # period = 50 samples of 30 minutes = around 5 days (8h each) of data
                 # ask for 30 min candles
-                data = self.load_historical_data(ticker, interval="30m", period="5d") # Gotta change this to use Alpaca
+                data = self.load_historical_data(
+                    ticker, interval="30m", period="5d"
+                )  # Gotta change this to use Alpaca
                 close = data.Close.values
 
                 # calculate EMAs
