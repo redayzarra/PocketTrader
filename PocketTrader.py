@@ -260,7 +260,7 @@ class Trader:
         """
         for attempt in range(1, config.maxAttemptsCP + 1):
             try:
-                position = self.api.get_position(ticker)
+                position = self.api.get_open_position(ticker)
                 current_price = float(position.current_price)
                 logging.info(
                     f"The position was found. Current price is: {current_price:.2f}"
