@@ -5,6 +5,7 @@ import time
 # Importing API
 from alpaca.trading.client import TradingClient
 from alpaca.data import CryptoHistoricalDataClient, StockHistoricalDataClient
+from alpaca.data.live import StockDataStream
 
 # Importing necessary files
 import config
@@ -53,23 +54,20 @@ def is_asset_tradable(api, ticker):
 
 def main():
     # paper=True enables paper trading
-    api = TradingClient("api-key", "secret-key", paper=True)
-    
-    # no keys required.
-    crypto_client = CryptoHistoricalDataClient()
+    api = TradingClient(config.API_KEY, config.SECRET_KEY, paper=True)
 
-    # keys required
-    stock_client = StockHistoricalDataClient("api-key",  "secret-key")
+    # keys required - real time data for later
+    # stock_stream = StockDataStream(config.API_KEY, config.SECRET_KEY)
 
-    initialize_logging() 
+    initialize_logging()
 
-    check_account_status(api) 
+    check_account_status(api)
 
-    cancel_all_orders(api) 
+    cancel_all_orders(api)
 
-    ticker = input("INSERT TICKER: ") 
+    ticker = input("INSERT TICKER: ")
 
-    is_asset_tradable(api, ticker) 
+    is_asset_tradable(api, ticker)
 
     trader = Trader(ticker, api)
 

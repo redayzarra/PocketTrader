@@ -6,16 +6,16 @@ import time
 from datetime import datetime, timedelta
 from enum import Enum
 
-# Importing API
-from alpaca.common.exceptions import APIError
-from alpaca.trading.models import OrderSide, OrderType, TimeInForce
-from alpaca.trading.requests import OrderRequest
-
 # Import fun libraries
 import numpy as np
 import pandas as pd
 import tulipy as ti
-import yfinance as yf  # Not needed, I'll figure this out later
+import yfinance as yf  # I'll figure this out later
+
+# Importing API
+from alpaca.common.exceptions import APIError
+from alpaca.trading.models import OrderSide, OrderType, TimeInForce
+from alpaca.trading.requests import OrderRequest
 
 import config
 from logger import *
@@ -397,7 +397,7 @@ class Trader:
                 # ask for 30 min candles
                 data = self.load_historical_data(
                     ticker, interval="30m", period="5d"
-                )  # Gotta change this to use Alpaca
+                )
                 close = data.Close.values
 
                 # calculate EMAs
