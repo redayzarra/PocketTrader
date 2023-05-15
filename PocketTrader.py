@@ -16,8 +16,6 @@ import yfinance as yf  # I'll figure this out later
 from alpaca.common.exceptions import APIError
 from alpaca.trading.models import OrderSide, OrderType, TimeInForce
 from alpaca.trading.requests import OrderRequest
-
-import config
 from logger import *
 
 import json

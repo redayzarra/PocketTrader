@@ -1,6 +1,7 @@
 # encoding: utf-8
 import sys
 import time
+import json
 
 # Importing API
 from alpaca.trading.client import TradingClient
@@ -8,9 +9,12 @@ from alpaca.data import CryptoHistoricalDataClient, StockHistoricalDataClient
 from alpaca.data.live import StockDataStream
 
 # Importing necessary files
-import config
 from logger import *
 from PocketTrader import Trader
+
+# Open the JSON file for reading
+with open("config.json", "r") as f:
+    config = json.load(f)
 
 
 def check_account_status(api):
@@ -54,10 +58,10 @@ def is_asset_tradable(api, ticker):
 
 def main():
     # paper=True enables paper trading
-    api = TradingClient(config.API_KEY, config.SECRET_KEY, paper=True)
+    api = TradingClient(config["API_KEY"], config["SECRET_KEY"], paper=True)
 
     # keys required - real time data for later
-    # stock_stream = StockDataStream(config.API_KEY, config.SECRET_KEY)
+    # stock_stream = StockDataStream(config["API_KEY"], config["SECRET_KEY"])
 
     initialize_logging()
 
@@ -76,10 +80,10 @@ def main():
 
         if not trading_success:
             logging.info("Trading was not successful, locking asset")
-            time.sleep(config.sleepTimeME)
+            time.sleep(config["sleepTimeME"])
         else:
             logging.info("Trading was successful!")
-            time.sleep(config.sleepTimeME)
+            time.sleep(config["sleepTimeME"])
 
 
 if __name__ == "__main__":
