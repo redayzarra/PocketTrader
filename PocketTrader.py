@@ -20,6 +20,12 @@ from alpaca.trading.requests import OrderRequest
 import config
 from logger import *
 
+import json
+
+# Open the JSON file for reading
+with open("config.json", "r") as f:
+    config = json.load(f)
+
 
 class Trader:
     def __init__(self, ticker, api):
@@ -72,11 +78,11 @@ class Trader:
         """
         try:
             if trend == "long":
-                stop_loss = entry_price - (entry_price * config.stopLossMargin)
+                stop_loss = entry_price - (entry_price * config["stopLossMargin"])
                 logging.info(f"Stop loss set for long at {stop_loss:.2f}")
                 return stop_loss
             elif trend == "short":
-                stop_loss = entry_price + (entry_price * config.stopLossMargin)
+                stop_loss = entry_price + (entry_price * config["stopLossMargin"])
                 logging.info(f"Stop loss set for short at {stop_loss:.2f}")
                 return stop_loss
             else:
@@ -101,11 +107,11 @@ class Trader:
         """
         try:
             if trend == "long":
-                take_profit = entry_price + (entry_price * config.takeProfitMargin)
+                take_profit = entry_price + (entry_price * config["takeProfitMargin"])
                 logging.info(f"Take profit set for long at {take_profit:.2f}")
                 return take_profit
             elif trend == "short":
-                take_profit = entry_price - (entry_price * config.takeProfitMargin)
+                take_profit = entry_price - (entry_price * config["takeProfitMargin"])
                 logging.info(f"Take profit set for short at {take_profit:.2f}")
                 return take_profit
             else:
@@ -182,7 +188,8 @@ class Trader:
         if trend in ("long", "short") and not exit:
             side = "buy" if trend == "long" else "sell"
             limit_price = round(
-                current_price * (1 + (1 if trend == "long" else -1) * config.maxVar), 2
+                current_price * (1 + (1 if trend == "long" else -1) * config["maxVar"]),
+                2,
             )
         elif trend in ("long", "short") and exit:
             side = "sell" if trend == "long" else "buy"
@@ -229,7 +236,7 @@ class Trader:
         """
         logging.info(f"Cancelling order {self.order_id} for {ticker}")
 
-        for attempt in range(1, config.maxAttemptsCPO + 1):
+        for attempt in range(1, config["maxAttemptsCPO"] + 1):
             try:
                 self.api.cancel_order_by_id(self.order_id)
                 logging.info(f"Order {self.order_id} cancelled correctly")
@@ -238,10 +245,10 @@ class Trader:
                 logging.warning(
                     f"Attempt {attempt}: Order could not be cancelled, retrying... ({e})"
                 )
-                time.sleep(config.sleepTimeCPO)
+                time.sleep(config["sleepTimeCPO"])
 
         logging.error(
-            f"The order could not be cancelled after {config.maxAttemptsCPO} attempts"
+            f"The order could not be cancelled after {config['maxAttemptsCPO']} attempts"
         )
         logging.info(f"Client order ID: {self.order_id}")
         sys.exit()
@@ -258,7 +265,7 @@ class Trader:
         Returns:
             bool: True if the position is found, False otherwise.
         """
-        for attempt in range(1, config.maxAttemptsCP + 1):
+        for attempt in range(1, config["maxAttemptsCP"] + 1):
             try:
                 position = self.api.get_open_position(ticker)
                 current_price = float(position.current_price)
@@ -273,7 +280,7 @@ class Trader:
 
                 logging.info(f"Exception: {e}")
                 logging.info("Position not found, waiting for it...")
-                time.sleep(config.sleepTimeME)
+                time.sleep(config["sleepTimeME"])
 
         logging.info(f"Position not found for {ticker}, not waiting any more")
         return False
@@ -299,7 +306,7 @@ class Trader:
             equity = float(account.equity) if account.equity else 0
 
             # Calculate the number of shares
-            shares_quantity = int(config.maxSpentEquity / asset_price)
+            shares_quantity = int(config["maxSpentEquity"] / asset_price)
 
             # Check if sufficient equity is available
             if equity - shares_quantity * asset_price > 0:
@@ -329,7 +336,7 @@ class Trader:
         Raises:
             Exception: If the position is not found after the maximum number of attempts.
         """
-        for attempt in range(1, config.maxAttemptsGCP + 1):
+        for attempt in range(1, config["maxAttemptsGCP"] + 1):
             try:
                 position = self.api.get_open_position(ticker)
                 current_price = float(position.current_price)
@@ -341,7 +348,7 @@ class Trader:
                 logging.info(
                     "Position not found, cannot check price, waiting for it..."
                 )
-                time.sleep(config.sleepTimeGCP)  # wait a defined time and retry
+                time.sleep(config["sleepTimeGCP"])  # wait a defined time and retry
 
         logging.error(f"Position not found for {ticker}, not waiting any more")
         raise Exception("Position not found after maximum attempts")
@@ -359,7 +366,7 @@ class Trader:
         Raises:
             Exception: If the position is not found after the maximum number of attempts.
         """
-        for attempt in range(1, config.maxAttemptsGAEP + 1):
+        for attempt in range(1, config["maxAttemptsGAEP"] + 1):
             try:
                 position = self.api.get_open_position(ticker)
                 avg_entry_price = float(position.avg_entry_price)
@@ -371,7 +378,7 @@ class Trader:
                 logging.info(
                     "Position not found, cannot check price, waiting for it..."
                 )
-                time.sleep(config.sleepTimeGAEP)  # wait a defined time and retry
+                time.sleep(config["sleepTimeGAEP"])  # wait a defined time and retry
 
         logging.error(f"Position not found for {ticker}, not waiting any more")
         raise Exception("Position not found after maximum attempts")
@@ -391,13 +398,11 @@ class Trader:
         """
         logging.info("\nGENERAL TREND ANALYSIS entered")
 
-        for attempt in range(1, config.maxAttemptsGGT + 1):
+        for attempt in range(1, config["maxAttemptsGGT"] + 1):
             try:
                 # period = 50 samples of 30 minutes = around 5 days (8h each) of data
                 # ask for 30 min candles
-                data = self.load_historical_data(
-                    ticker, interval="30m", period="5d"
-                )
+                data = self.load_historical_data(ticker, interval="30m", period="5d")
                 close = data.Close.values
 
                 # calculate EMAs
@@ -418,7 +423,7 @@ class Trader:
                     return "short"
                 else:
                     logging.info(f"Trend not clear for {ticker}, waiting...")
-                    time.sleep(config.sleepTimeGGT * config.maxAttemptsGGT)
+                    time.sleep(config["sleepTimeGGT"] * config["maxAttemptsGGT"])
 
             except Exception as e:
                 logging.error(f"Error occurred while detecting trend for {ticker}: {e}")
@@ -443,7 +448,7 @@ class Trader:
         """
         logging.info("\nINSTANT TREND ANALYSIS entered")
 
-        for attempt in range(1, config.maxAttemptsGIT + 1):
+        for attempt in range(1, config["maxAttemptsGIT"] + 1):
             try:
                 # period = 50 samples of 5 minutes = less than 1 day (8h) of data
                 data = self.load_historical_data(ticker, interval="5m", period="1d")
@@ -465,7 +470,7 @@ class Trader:
                     return True
                 else:
                     logging.info(f"Trend not clear for {ticker}, waiting...")
-                    time.sleep(config.sleepTimeGIT)
+                    time.sleep(config["sleepTimeGIT"])
 
             except Exception as e:
                 logging.error(
@@ -492,7 +497,7 @@ class Trader:
         """
         logging.info("\nRSI ANALYSIS entered")
 
-        for attempt in range(1, config.maxAttemptsRSI + 1):
+        for attempt in range(1, config["maxAttemptsRSI"] + 1):
             try:
                 # period = 50 samples of 5 minutes = less than 1 day (8h) of data
                 data = self.load_historical_data(ticker, interval="5m", period="1d")
@@ -509,7 +514,7 @@ class Trader:
                     return True
                 else:
                     logging.info(f"Trend not clear for {ticker}, waiting...")
-                    time.sleep(config.sleepTimeRSI)
+                    time.sleep(config["sleepTimeRSI"])
 
             except Exception as e:
                 logging.error(
@@ -536,7 +541,7 @@ class Trader:
         """
         logging.info("\nSTOCHASTIC ANALYSIS entered")
 
-        for attempt in range(1, config.maxAttemptsSTC + 1):
+        for attempt in range(1, config["maxAttemptsSTC"] + 1):
             try:
                 # period = 50 samples of 5 minutes = less than 1 day (8h) of data
                 data = self.load_historical_data(ticker, interval="5m", period="1d")
@@ -566,7 +571,7 @@ class Trader:
                     return True
                 else:
                     logging.info(f"Trend not clear for {ticker}, waiting...")
-                    time.sleep(config.sleepTimeSTC)
+                    time.sleep(config["sleepTimeSTC"])
 
             except Exception as e:
                 logging.error(
@@ -650,7 +655,7 @@ class Trader:
         stop_loss = self.set_stoploss(entry_price, trend)
 
         try:
-            for attempt in range(1, config.maxAttemptsEPM + 1):
+            for attempt in range(1, config["maxAttemptsEPM"] + 1):
                 self.current_price = self.get_current_price(ticker)
 
                 # Check if take profit or stop loss is met
@@ -684,7 +689,7 @@ class Trader:
                 logging.info(
                     f"SL {stop_loss:.2f} <-- {self.current_price:.2f} --> {take_profit:.2f} TP"
                 )
-                time.sleep(config.sleepTimeEPM)
+                time.sleep(config["sleepTimeEPM"])
 
             logging.info("Timeout reached at enter position, too late")
             return False
@@ -770,7 +775,7 @@ class Trader:
             # Check the position is cleared
             while not self.check_position(ticker, do_not_find=True):
                 logging.info("WARNING! THE POSITION SHOULD BE CLOSED! Retrying...")
-                time.sleep(config.sleepTimeCP)  # wait 10 seconds
+                time.sleep(config["sleepTimeCP"])  # wait 10 seconds
 
             # End of execution
             return successful_operation
