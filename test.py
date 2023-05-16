@@ -1,4 +1,6 @@
+import json
 import customtkinter
+import tkinter.messagebox as msgbox
 
 
 class ConfigGUI(customtkinter.CTk):
@@ -74,7 +76,10 @@ class ConfigGUI(customtkinter.CTk):
 
         # Save Changes button
         self.save_button = customtkinter.CTkButton(
-            self.settings_frame, text="Save changes", width=20
+            self.settings_frame,
+            text="Save changes",
+            width=20,
+            command=self.update_config,
         )
         self.save_button.pack(pady=20)
 
@@ -92,6 +97,47 @@ class ConfigGUI(customtkinter.CTk):
         entry.grid(row=0, column=1, sticky="ew")
 
         return entry
+
+    def update_config(self):
+        # Read the existing config data
+        with open("config.json", "r") as f:
+            config_data = json.load(f)
+
+        # Update values based on GUI entries
+        try:
+            api_key = self.api_key_entry.get().strip()
+            secret_key = self.secret_key_entry.get().strip()
+            stop_loss_margin = float(self.stop_loss_margin_entry.get())
+            take_profit_margin = float(self.take_profit_margin_entry.get())
+            max_spent_equity = float(self.max_spent_equity_entry.get())
+            max_var = float(self.max_var_entry.get())
+        except ValueError:
+            msgbox.showerror(
+                "Invalid Input", "Please ensure all fields are correctly filled."
+            )
+            return
+
+        # Validate inputs
+        if not (0 <= stop_loss_margin <= 1) or not (0 <= take_profit_margin <= 1):
+            msgbox.showerror(
+                "Invalid Input", "Please ensure both margin fields are between 0 and 1."
+            )
+            return
+
+        config_data["API_KEY"] = api_key
+        config_data["SECRET_KEY"] = secret_key
+        config_data["stopLossMargin"] = stop_loss_margin
+        config_data["takeProfitMargin"] = take_profit_margin
+        config_data["maxSpentEquity"] = max_spent_equity
+        config_data["maxVar"] = max_var
+
+        # Write the updated data back to the config file
+        try:
+            with open("config.json", "w") as f:
+                json.dump(config_data, f, indent=4)
+            msgbox.showinfo("Success", "Configuration updated successfully!")
+        except Exception as e:
+            msgbox.showerror("Error", f"Could not write to config file: {e}")
 
 
 if __name__ == "__main__":
