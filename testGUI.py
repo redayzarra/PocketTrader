@@ -36,16 +36,28 @@ class ConfigGUI(customtkinter.CTk):
         self.settings_frame.grid_columnconfigure(0, weight=1)
 
         # Entries for API_KEY, SECRET_KEY, maxSpentEquity
-        self.api_key_entry = self.create_entry("API string:")
-        self.secret_key_entry = self.create_entry("Secret API string:")
-        self.max_spent_equity_entry = self.create_entry("Max Spent Equity:")
+        self.api_key_entry = self.create_entry(
+            "API string:", "Paste string here", show="*"
+        )
+        self.secret_key_entry = self.create_entry(
+            "Secret API string:", "Paste string here", show="*"
+        )
+        self.max_spent_equity_entry = self.create_entry(
+            "Max Spent Equity:", "Enter numerical value"
+        )
 
         # Entries for stopLossMargin, takeProfitMargin, maxVar
-        self.stop_loss_margin_entry = self.create_entry("Stop Loss Margin :")
-        self.take_profit_margin_entry = self.create_entry("Take Profit Margin:")
-        self.max_var_entry = self.create_entry("Max Variation:")
+        self.stop_loss_margin_entry = self.create_entry(
+            "Stop Loss Margin :", "Enter numerical value"
+        )
+        self.take_profit_margin_entry = self.create_entry(
+            "Take Profit Margin:", "Enter numerical value"
+        )
+        self.max_var_entry = self.create_entry(
+            "Max Variation:", "Enter numerical value"
+        )
 
-    def create_entry(self, label_text):
+    def create_entry(self, label_text, placeholder=None, show=None):
         entry_frame = customtkinter.CTkFrame(self.settings_frame)
         entry_frame.grid_columnconfigure(1, weight=1)
         entry_frame.pack(fill="x", padx=(10, 20), pady=10)
@@ -53,7 +65,9 @@ class ConfigGUI(customtkinter.CTk):
         label = customtkinter.CTkLabel(entry_frame, text=label_text)
         label.grid(row=0, column=0, padx=(0, 10))
 
-        entry = customtkinter.CTkEntry(entry_frame, width=20)  # Width for text entries
+        entry = customtkinter.CTkEntry(
+            entry_frame, width=20, placeholder_text=placeholder, show=show
+        )  # Width for text entries
         entry.grid(row=0, column=1, sticky="ew")
 
         return entry
