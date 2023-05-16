@@ -11,6 +11,7 @@ from alpaca.data.live import StockDataStream
 # Importing necessary files
 from logger import *
 from PocketTrader import Trader
+from GUI import PocketTraderGUI
 
 # Open the JSON file for reading
 with open("config.json", "r") as f:
@@ -57,6 +58,22 @@ def is_asset_tradable(api, ticker):
 
 
 def main():
+    # Always open the GUI at startup
+    gui = PocketTraderGUI()
+    gui.mainloop()
+
+    # Reload the config file after GUI closes
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    # Check if API keys are not empty
+    while not config["API_KEY"] or not config["SECRET_KEY"]:
+        print("API keys are missing. Please enter valid API keys.")
+        gui = PocketTraderGUI()
+        gui.mainloop()
+        with open("config.json", "r") as f:
+            config = json.load(f)
+
     # paper=True enables paper trading
     api = TradingClient(config["API_KEY"], config["SECRET_KEY"], paper=True)
 
@@ -84,6 +101,10 @@ def main():
         else:
             logging.info("Trading was successful!")
             time.sleep(config["sleepTimeME"])
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
