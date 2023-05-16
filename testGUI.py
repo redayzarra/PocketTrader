@@ -7,7 +7,7 @@ class ConfigGUI(customtkinter.CTk):
 
         # Configure window
         self.title("Pocket Trader by RDZ")
-        self.geometry("800x400")  # Window Size
+        self.geometry("800x475")  # Window Size
 
         # Configure grid layout
         self.grid_rowconfigure(0, weight=1)  # Title row
@@ -28,7 +28,22 @@ class ConfigGUI(customtkinter.CTk):
         self.explanation_textbox.grid(
             row=1, column=0, padx=(20, 10), pady=20, sticky="nsew"
         )
-        self.explanation_textbox.insert("0.0", "Explanation text goes here...")
+        self.explanation_textbox.insert(
+            "0.0",
+            "Welcome to PocketTrader!\n\n"
+            "PocketTrader is a trading bot designed to automate your trading strategy. "
+            "This GUI allows you to configure the bot according to your needs!\n\n"
+            "API string & Secret API string: These are your unique identifiers for your Alpaca account. "
+            "Please make sure to copy and paste the API strings in their correct spots. "
+            "These fields are hidden for your security.\n\n"
+            "Max Spent Equity: The maximum amount of your equity that you're willing to spend on a single trade. "
+            "Make sure this value aligns with your trading strategy and risk tolerance.\n\n"
+            "Stop Loss Margin & Take Profit Margin: These margins determine when the bot will automatically "
+            "sell a security. Stop loss is to prevent further losses, and take profit is to secure profits. "
+            "Note: 10% is represented as 0.1, not 10.\n\n"
+            "Max Variation: This is the maximum variation in the price that you're willing to tolerate.\n\n"
+            "Please make sure to enter valid values in all fields before saving the configuration!",
+        )
 
         # Settings frame
         self.settings_frame = customtkinter.CTkFrame(self, width=150)
