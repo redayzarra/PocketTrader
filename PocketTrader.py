@@ -1,4 +1,5 @@
 # Import necessary libraries
+import json
 import math
 import os
 import sys
@@ -16,9 +17,8 @@ import yfinance as yf  # I'll figure this out later
 from alpaca.common.exceptions import APIError
 from alpaca.trading.models import OrderSide, OrderType, TimeInForce
 from alpaca.trading.requests import OrderRequest
-from logger import *
 
-import json
+from logger import *
 
 # Open the JSON file for reading
 with open("config.json", "r") as f:
