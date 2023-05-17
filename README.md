@@ -84,4 +84,4 @@ If you find a bug or want to propose a new feature, please open an issue. I real
 
 ## License
 
-This project is licensed under the MIT license. Please see the LICENSE file for details.
+This project is licensed under the MIT license. Please see the [LICENSE](https://github.com/redayzarra/PocketTrader/blob/master/LICENSE) file for details.
