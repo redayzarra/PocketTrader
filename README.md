@@ -1,6 +1,15 @@
-# PocketTrader - Trading Bot
+<div align="center">
+ 
+  <img src="https://github.com/redayzarra/PocketTrader/assets/113388793/fb6d1103-2ba2-4be9-aada-cc5e744374f2" alt="PocketTrader_Logo">
+ 
+</div>
+
+
+<br> <!-- This line adds a line break -->
 
 PocketTrader is a trading bot designed to automate trades on [**Alpaca**](https://alpaca.markets/docs/python-sdk/getting_started.html#), a commission-free API-first stock brokerage. It interfaces with Alpaca's API to place trades, cancel orders, and check asset status. It also supports paper trading for testing strategies without risking real money.
+
+<br> <!-- This line adds a line break -->
 
 <div align="center">
  
