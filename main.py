@@ -86,7 +86,7 @@ def main():
 
     cancel_all_orders(api)
 
-    ticker = input("INSERT TICKER: ")
+    ticker = config["ticker"]
 
     is_asset_tradable(api, ticker)
 

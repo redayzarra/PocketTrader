@@ -1,6 +1,9 @@
 import json
+import os
+from PIL import Image
 import customtkinter
 import tkinter.messagebox as msgbox
+from tkinter import Label
 
 
 class PocketTraderGUI(customtkinter.CTk):
@@ -9,7 +12,7 @@ class PocketTraderGUI(customtkinter.CTk):
 
         # Configure window
         self.title("Pocket Trader by RDZ")
-        self.geometry("800x460")  # Window Size
+        self.geometry("800x535")  # Window Size
 
         # Configure grid layout
         self.grid_rowconfigure(0, weight=1)  # Title row
@@ -17,13 +20,14 @@ class PocketTraderGUI(customtkinter.CTk):
         self.grid_columnconfigure(0, weight=2)  # Explanation textbox
         self.grid_columnconfigure(1, weight=8)  # Settings frame
 
-        # Title label
-        self.title_label = customtkinter.CTkLabel(
-            self,
-            text="PocketTrader",
-            font=customtkinter.CTkFont(size=40, weight="bold"),
-        )
-        self.title_label.grid(row=0, column=0, columnspan=2, pady=5)
+        # Logo image
+        logo_image_path = "assets/PTText.png"
+        self.logo_image = customtkinter.CTkImage(
+            Image.open(logo_image_path), size=(400, 45)
+        )  # adjust the size
+
+        self.logo_label = customtkinter.CTkLabel(self, image=self.logo_image, text="")
+        self.logo_label.grid(row=0, column=0, columnspan=2, pady=(20, 0))
 
         # Explanation textbox
         self.explanation_textbox = customtkinter.CTkTextbox(self, width=400)
@@ -38,6 +42,9 @@ class PocketTraderGUI(customtkinter.CTk):
             "API string & Secret API string: These are your unique identifiers for your Alpaca account."
             "Please make sure to copy and paste the API strings in their correct spots."
             "These fields are hidden for your security.\n\n"
+            "Ticker: This is the symbol for the security that you want to trade. "
+            "It is usually a unique series of letters assigned to a security for trading purposes. "
+            "For example, AAPL is the ticker for Apple Inc.\n\n"
             "Max Spent Equity: The maximum amount of your equity that you're willing to spend on a single trade."
             "Make sure this value aligns with your trading strategy and risk tolerance.\n\n"
             "Stop Loss Margin & Take Profit Margin: These margins determine when the bot will automatically"
@@ -53,13 +60,14 @@ class PocketTraderGUI(customtkinter.CTk):
         self.settings_frame.grid(row=1, column=1, padx=(10, 20), pady=20, sticky="nsew")
         self.settings_frame.grid_columnconfigure(0, weight=1)
 
-        # Entries for API_KEY, SECRET_KEY, maxSpentEquity
+        # Entries for API_KEY, SECRET_KEY, ticker, maxSpentEquity
         self.api_key_entry = self.create_entry(
             "API string:", "Paste string here", show="*"
         )
         self.secret_key_entry = self.create_entry(
             "Secret API string:", "Paste string here", show="*"
         )
+        self.ticker_entry = self.create_entry("Ticker:", "Enter ticker")
         self.max_spent_equity_entry = self.create_entry(
             "Max Spent Equity:", "Enter numerical value"
         )
@@ -108,6 +116,7 @@ class PocketTraderGUI(customtkinter.CTk):
         try:
             api_key = self.api_key_entry.get().strip()
             secret_key = self.secret_key_entry.get().strip()
+            ticker = self.ticker_entry.get().strip()  # Add this line
             stop_loss_margin = float(self.stop_loss_margin_entry.get())
             take_profit_margin = float(self.take_profit_margin_entry.get())
             max_spent_equity = float(self.max_spent_equity_entry.get())
@@ -127,6 +136,7 @@ class PocketTraderGUI(customtkinter.CTk):
 
         config_data["API_KEY"] = api_key
         config_data["SECRET_KEY"] = secret_key
+        config_data["ticker"] = ticker
         config_data["stopLossMargin"] = stop_loss_margin
         config_data["takeProfitMargin"] = take_profit_margin
         config_data["maxSpentEquity"] = max_spent_equity

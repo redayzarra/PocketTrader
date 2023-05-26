@@ -1,0 +1,5 @@
+2023-05-17 09:00:16,091 - DEBUG: Starting new HTTPS connection (1): paper-api.alpaca.markets:443
+2023-05-17 09:00:16,238 - DEBUG: https://paper-api.alpaca.markets:443 "GET /v2/account HTTP/1.1" 403 26
+2023-05-17 09:00:16,239 - ERROR: Could not get account info, aborting
+2023-05-17 09:00:16,239 - INFO: {"message": "forbidden."}
+
