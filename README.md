@@ -13,8 +13,8 @@ PocketTrader is a trading bot designed to automate trades on [**Alpaca**](https:
 
 <div align="center">
  
-  <img src="https://github.com/redayzarra/PocketTrader/assets/113388793/24ec681a-165d-43a0-8efd-2d72a46e3297" alt="PocketTrader_GUI">
- 
+  <img src="https://github.com/redayzarra/PocketTrader/assets/113388793/e53d6b17-b533-49a1-b884-3bcc52f0c4b7" alt="PocketTrader_GUI">
+
 </div>
 
 ## Table of Contents
